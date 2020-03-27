@@ -1,0 +1,36 @@
+ requestedDevice = str(input("Choose either SMARTLOCK or DOORBELL or cancel: "))
+                        askedUserForDevice = True
+                    if (requestedDevice == "cancel"):
+                        userCommand = ""
+                        requestedDevice = ""
+                        askedUser = False
+                        break
+                    if (requestedDevice == "SMARTLOCK" or requestedDevice == "DOORBELL"):
+                        askedUser = True
+                        break
+
+
+ while (requestedDevice != "DOORBELL" and requestedDevice != "SMARTLOCK" and requestedDevice != "cancel"):
+                    requestedDevice = ""
+                    if not (askedUserForDevice):
+                        print("Enter 1 or 2 for device (1 is SMARTLOCK, 2 is DOORBELL, or choose c for cancel): ")
+                        askedUserForDevice = True
+                        requestedDeviceNumber, o, e = select.select([sys.stdin], [], [], 2)
+                        if (requestedDeviceNumber):
+                            if (requestedDeviceNumber == 1):
+                                requestedDevice = "SMARTLOCK"
+                                askedUser = True
+                                break
+                            elif (requestedDeviceNumber == 2):
+                                requestedDevice = "DOORBELL"
+                                askedUser = True
+                                break
+                            elif (requestedDeviceNumber == c):
+                                userCommand = ""
+                                requestedDevice = ""
+                                askedUser = False
+                                break
+                            else:
+                                print("You did not choose correctly")
+                    else:
+                        askedUserForDevice = False
