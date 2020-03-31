@@ -10,13 +10,6 @@ from multiprocessing import Process
 
 # requirements... pip install pydub and pip install ffmpeg (for doorbell sound)
 
-# Plan: python server will act as server and the esps will try to connect to the server, they will send their names through packets
-
-# tasks... Create the website with flask!! e.g. if server.com/lock is asked for, then lock the door!!!
-# tropical doorbell sound
-
-# server will ask for updates every couple of seconds, and clients will respond
-
 # possible features: add a way to tell the python server that esp is resetting
 
 # initialize variables
@@ -169,11 +162,11 @@ if __name__ == "__main__":
     amountofClients = amountofClients + 1
     getDeviceName1 = recvMsg(conn1)  # need to input which device to use
 
-    # second device
-    # print("Waiting for second device to connect to connect...")
-    # conn2, deviceaddr2 = sock.accept()
-    # amountofClients = amountofClients + 1
-    # getDeviceName2 = recvMsg(conn2)  # device should send bytes identifying itself, recieve msg returns message encoded
+    second device
+    print("Waiting for second device to connect to connect...")
+    conn2, deviceaddr2 = sock.accept()
+    amountofClients = amountofClients + 1
+    getDeviceName2 = recvMsg(conn2)  # device should send bytes identifying itself, recieve msg returns message encoded
 
     if getDeviceName1 == "D":
         DOORBELLCONN = conn1
@@ -181,11 +174,11 @@ if __name__ == "__main__":
     elif getDeviceName1 == "S":
         SMARTLOCKCONN = conn1
 
-    # if (getDeviceName2 == "DOORBELL"):
-    #    DOORBELLCONN = conn2
-    #    DoorbellAddr = deviceaddr2
-    # elif (getDeviceName2 == "SMARTLOCK"):
-    #    SMARTLOCKCONN = conn2
+    if (getDeviceName2 == "DOORBELL"):
+        DOORBELLCONN = conn2
+        DoorbellAddr = deviceaddr2
+     elif (getDeviceName2 == "SMARTLOCK"):
+        SMARTLOCKCONN = conn2
 
     DoorbellAddr = DoorbellAddr[0]
     p = Process(target=proxySetup, args=(DoorbellAddr,))
@@ -257,11 +250,11 @@ if __name__ == "__main__":
         print("Waiting for update from DOORBELL...")
         updateInfoD = recvMsg(DOORBELLCONN)
 
-        #print("Sending update request to SMARTLOCK...")
-        #sendtoDevice(update.encode('UTF-8'), "SMARTLOCK")
-        #print("Waiting for update from SMARTLOCK...")
-        #updateInfoS = recvMsg(SMARTLOCKCONN)  # waits for response
-        #print(updateInfoS)
+        print("Sending update request to SMARTLOCK...")
+        sendtoDevice(update.encode('UTF-8'), "SMARTLOCK")
+        print("Waiting for update from SMARTLOCK...")
+        updateInfoS = recvMsg(SMARTLOCKCONN)  # waits for response
+        print(updateInfoS)
 
         # check for motion sensor
         if "t" in updateInfoD:
@@ -283,11 +276,11 @@ if __name__ == "__main__":
             play(song)
         elif "i" in updateInfoD:
             print("Proximity sensor was not triggered")
-        # check is door is locked
-        #if "l" in updateInfoS:
-        #   print("Smartlock is locked")
-        #elif "n" in updateInfoS:
-        #    print("Smartlock isn't locked")
+         # check if door is locked
+        if "l" in updateInfoS:
+            print("Smartlock is locked")
+        elif "n" in updateInfoS:
+            print("Smartlock isn't locked")
 
         # check for RFID code:
         if "R1234" in updateInfoD:
