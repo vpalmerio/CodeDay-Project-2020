@@ -243,7 +243,7 @@ if __name__ == "__main__":
             # check if RFID data matches the hardcoded unlock code
             if RFIDdecoded == "e5 b3 3f 23":
                 # sends unlock command and waits for response
-                unlock = 'u'
+                unlock = 'U'
                 print("Sending unlock code to smart lock")
 
                 if not debugMode:
@@ -254,7 +254,7 @@ if __name__ == "__main__":
                     else:
                         print("Did not receive unlock response. Did the door unlock?")
 
-            # remove the RFID data from the packet since we alreayd dealt with it and we dont confuse the server
+            # remove the RFID data from the packet since we already dealt with it and we dont confuse the server
             updateInfoD = updateInfoD[updateInfoD.find(EndofMessage)+1:]
             print("New UpdateInfoD: " + updateInfoD)
 
