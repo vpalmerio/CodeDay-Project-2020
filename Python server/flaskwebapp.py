@@ -23,7 +23,7 @@ def login():
 
 @app.route("/lock")
 def lock():
-    MESSAGE = "l:"
+    MESSAGE = "l"
     s.send(MESSAGE.encode('UTF-8'))
     print("Lock command sent to server")
     return app.send_static_file('lock.html')
@@ -31,7 +31,7 @@ def lock():
 
 @app.route("/unlock")
 def unlocked():
-    MESSAGE = "u:"
+    MESSAGE = "u"
     s.send(MESSAGE.encode('UTF-8'))
     print("Unlock command sent to server")
     return app.send_static_file('unlock.html')

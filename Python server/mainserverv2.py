@@ -85,7 +85,7 @@ def checkWebsite(webprocessconn):
             print("Command received from website")
     except socket.timeout:
         print("No command from website received")
-        webcommand = None
+        webcommand = ''
         pass
     return webcommand
 
@@ -220,12 +220,43 @@ if __name__ == "__main__":
         print("Waiting for update from DOORBELL...")
         updateInfoD = comm.recvMsg(DOORBELLCONN)
 
+        # change the smartlock conn soon
         if not debugMode:
             print("Sending update request to SMARTLOCK...")
             comm.sendtoDevice(update.encode('UTF-8'), SMARTLOCKCONN)
             print("Waiting for update from SMARTLOCK...")
             updateInfoS = comm.recvMsg(SMARTLOCKCONN)  # waits for response
             print(updateInfoS)
+
+        # check for RFID code:
+        if "Z" in updateInfoD:
+            print("Received RFID Data")
+            # take out the RFID data from the packet
+            RFID = []
+            BeginningofMessage = 'Z'
+            EndofMessage = "/"
+            RFID.append(updateInfoD[1:updateInfoD.find(
+                EndofMessage)])  # the end of the RFID data is a /, so if you find the / then stop looking for more info
+            RFIDdecoded = ''.join(RFID)  # turn RFID data into a string
+            print("RFID Card: " + RFIDdecoded)
+
+            # check if RFID data matches the hardcoded unlock code
+            if RFIDdecoded == "e5 b3 3f 23":
+                # sends unlock command and waits for response
+                unlock = 'u'
+                print("Sending unlock code to smart lock")
+
+                if not debugMode:
+                    comm.sendtoDevice(unlock.encode('UTF-8'), SMARTLOCKCONN)
+                    updateInfoSU = comm.recvMsg(SMARTLOCKCONN)
+                    if "UN" in updateInfoSU:
+                        print("Successfully unlocked door")
+                    else:
+                        print("Did not receive unlock response. Did the door unlock?")
+
+            # remove the RFID data from the packet since we alreayd dealt with it and we dont confuse the server
+            updateInfoD = updateInfoD[updateInfoD.find(EndofMessage)+1:]
+            print("New UpdateInfoD: " + updateInfoD)
 
         # check for motion sensor
         if "t" in updateInfoD:
@@ -250,25 +281,20 @@ if __name__ == "__main__":
             print("Proximity sensor was not triggered")
 
         if not debugMode:
-            # check if door is locked
-            if "l" in updateInfoS:
+            # check if lock is locked
+            if "d" in updateInfoS:
                 print("Smartlock is locked")
-            elif "n" in updateInfoS:
+            elif "c" in updateInfoS:
                 print("Smartlock isn't locked")
-
-        # check for RFID code:
-        if "R1234" in updateInfoD:
-            # sends unlock command and waits for response
-            unlock = 'u'
-            comm.sendtoDevice(unlock.encode('UTF-8'), SMARTLOCKCONN)
-            updateInfoSU = comm.recvMsg(SMARTLOCKCONN)
-            if "UN" in updateInfoSU:
-                print("Successfully unlocked door")
-            else:
-                print("Did not receive unlock response. Did the door unlock?")
+            # check if door is open
+            if "a" in updateInfoS:
+                print("Door is open")
+            elif "b" in updateInfoS:
+                print("Door is closed")
 
         if userCommand:  # if there is a command, encode it into bytes and send it to requested device
-            comm.sendtoDevice(userCommand.encode('UTF-8'), requestedDevice)
+            userCommand = userCommand.encode('UTF-8')
+            comm.sendtoDevice(userCommand, requestedDevice)
 
             print("Command: " + userCommand + " sent to: " + requestedDevice)
 
