@@ -19,9 +19,6 @@ debugMode = False
 websiteFunctionality = True
 
 
-# address = ''
-# readMessage = ''
-
 class Proxy:
 
     def __init__(self):
@@ -46,7 +43,7 @@ class Proxy:
             print(data)
             print("Proxy: Data received")
 
-            if (len(data) > 0):
+            if len(data) > 0:
                 print("Proxy: Sending data to browser")
                 webconn.send(data)  # redirect data to browser
                 print("Proxy: Data sent to browser")
@@ -142,10 +139,10 @@ if __name__ == "__main__":
         SMARTLOCKCONN = conn1
 
     if not debugMode:
-        if (getDeviceName2 == "DOORBELL"):
+        if getDeviceName2 == "D":
             DOORBELLCONN = conn2
             DoorbellAddr = deviceaddr2
-        elif (getDeviceName2 == "SMARTLOCK"):
+        elif getDeviceName2 == "S":
             SMARTLOCKCONN = conn2
 
     # start the proxy server for the camera stream
