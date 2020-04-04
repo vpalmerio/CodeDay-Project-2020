@@ -90,6 +90,33 @@ def checkWebsite(webprocessconn):
     return webcommand
 
 
+def controlLights(DoorbellAddr, command):
+    if command == "on":
+        # tell the camera phone's light to turn on if motion sensor is triggered
+        webrequest = b'GET /enabletorch HTTP/1.1\r\nHost: localhost:8081\r\nUser-Agent: Mozilla/5.0 (X11; Ubuntu; ' \
+                     b'Linux x86_64; rv:74.0) Gecko/20100101 Firefox/74.0\r\nAccept: text/html,' \
+                     b'application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\r\nAccept-Language: ' \
+                     b'en-US,en;q=0.5\r\nAccept-Encoding: gzip, deflate\r\nDNT: 1\r\nConnection: ' \
+                     b'keep-alive\r\nUpgrade-Insecure-Requests: 1\r\n\r\n '
+
+        tempwebsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        tempwebsocket.connect((DoorbellAddr, 8080))
+        tempwebsocket.sendall(webrequest)
+        tempwebsocket.close()
+        # end of temp web socket
+    elif command == "off":
+        # disable light
+        webrequest2 = b'GET /enabletorch HTTP/1.1\r\nHost: localhost:8081\r\nUser-Agent: Mozilla/5.0 (X11; Ubuntu; ' \
+                      b'Linux x86_64; rv:74.0) Gecko/20100101 Firefox/74.0\r\nAccept: text/html,' \
+                      b'application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\r\nAccept-Language: ' \
+                      b'en-US,en;q=0.5\r\nAccept-Encoding: gzip, deflate\r\nDNT: 1\r\nConnection: ' \
+                      b'keep-alive\r\nUpgrade-Insecure-Requests: 1\r\n\r\n '
+        tempwebsocket2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        tempwebsocket2.connect((DoorbellAddr, 8080))
+        tempwebsocket2.sendall(webrequest2)
+        tempwebsocket2.close()
+
+
 if __name__ == "__main__":
 
     # setup initial variables
@@ -147,7 +174,7 @@ if __name__ == "__main__":
 
     # start the proxy server for the camera stream
     proxy = Proxy()
-    DoorbellAddr = DoorbellAddr[0]
+    DoorbellAddr = DoorbellAddr[0]  # camera ip
     p = Process(target=proxy.proxySetup, args=(DoorbellAddr,))
     p.start()
     print("Started proxy for camera website.")
@@ -255,13 +282,15 @@ if __name__ == "__main__":
                         print("Did not receive unlock response. Did the door unlock?")
 
             # remove the RFID data from the packet since we already dealt with it and we dont confuse the server
-            updateInfoD = updateInfoD[updateInfoD.find(EndofMessage)+1:]
+            updateInfoD = updateInfoD[updateInfoD.find(EndofMessage) + 1:]
             print("New UpdateInfoD: " + updateInfoD)
 
         # check for motion sensor
         if "t" in updateInfoD:
             print("Motion sensor was triggered!!")
-            if requestforMotion == True:
+            # light process for lights
+            controlLights(DoorbellAddr, "on")
+            if requestforMotion:
                 motiondata = "trig:"
                 print("Received a request, sending data...")
                 webprocessconn.send(motiondata.encode('UTF-8'))
@@ -270,6 +299,7 @@ if __name__ == "__main__":
                 print("No request received, continuing...")
         elif "n" in updateInfoD:
             print("Motion sensor was not triggered")
+            controlLights(DoorbellAddr, "off")
         else:
             print("Did not receive an update on motion sensor")
 

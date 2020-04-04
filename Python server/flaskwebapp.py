@@ -31,7 +31,7 @@ def lock():
 
 @app.route("/unlock")
 def unlocked():
-    MESSAGE = "u"
+    MESSAGE = "k"
     s.send(MESSAGE.encode('UTF-8'))
     print("Unlock command sent to server")
     return app.send_static_file('unlock.html')
